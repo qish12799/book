@@ -1,0 +1,38 @@
+
+
+DELIMITER ;;
+CREATE FUNCTION NatSort (Varstring VARCHAR(50))
+RETURNS VARCHAR(1000)
+READS SQL DATA
+DETERMINISTIC
+BEGIN
+DECLARE v_length INT DEFAULT 0;
+DECLARE v_num VARCHAR(50) DEFAULT '';
+DECLARE v_index INT DEFAULT 1;
+DECLARE v_result VARCHAR(1000) DEFAULT '';
+DECLARE v_flag INT DEFAULT 0;
+DECLARE v_char CHAR(1) DEFAULT '';
+SET v_flag=0;
+SET v_index=1;
+SET v_length=CHAR_LENGTH(Varstring);
+-- 遍历字符串
+WHILE v_index <= v_length DO
+    SET v_char = mid(Varstring,v_index,1);
+    IF (ASCII(v_char)>=48 AND ASCII(v_char)<=57) THEN
+        SET v_num=concat(v_num,mid(Varstring,v_index,1)); -- 获取字符串里的数字
+        SET v_flag = 1;
+    ELSE 
+        IF v_flag = 1 THEN
+            SET v_flag=0;
+            SET v_result=concat(v_result,lpad(cast(v_num AS UNSIGNED),10,'0')); -- 将数字转成定长字符串
+            SET v_num=''; -- 重置v_num
+        END IF;
+        SET v_result=concat(v_result, v_char);
+    END IF;
+    SET v_index = v_index + 1;
+END WHILE;
+IF v_flag=1 THEN
+	SET v_result=concat(v_result,lpad(cast(v_num AS UNSIGNED),10,'0'));
+END IF;
+RETURN v_result;
+END;;
